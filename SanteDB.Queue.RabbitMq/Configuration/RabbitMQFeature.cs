@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using SanteDB.Core.Configuration;
+using SanteDB.Core.Configuration.Features;
 
 namespace SanteDB.Queue.RabbitMq.Configuration
 {

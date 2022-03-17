@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
+using SanteDB.Core.Configuration;
 
 namespace SanteDB.Queue.RabbitMq.Configuration
 {

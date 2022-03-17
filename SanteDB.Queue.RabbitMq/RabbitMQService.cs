@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.Queue;
 using SanteDB.Core.Security;
@@ -118,7 +120,8 @@ namespace SanteDB.Queue.RabbitMq
                 this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
                     routingKey: "t1",
                     basicProperties: null,
-                    body: JsonSerializer.SerializeToUtf8Bytes(data));
+                    null);
+                //body: JsonSerializer(data));
             }
             catch (Exception ex)
             {
@@ -192,7 +195,9 @@ namespace SanteDB.Queue.RabbitMq
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
             //need to make http request to management api
-            
+
+            return null;
+
         }
 
         /// <summary>
