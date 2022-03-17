@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.Queue;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Queue.RabbitMq.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 
 namespace SanteDB.Queue.RabbitMq
 {
