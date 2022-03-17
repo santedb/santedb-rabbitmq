@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SanteDB.Queue.RabbitMq
 {
@@ -119,8 +120,7 @@ namespace SanteDB.Queue.RabbitMq
                 this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
                     routingKey: "t1",
                     basicProperties: null,
-                    null);
-                //body: JsonSerializer(data));
+                    Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)));
             }
             catch (Exception ex)
             {
