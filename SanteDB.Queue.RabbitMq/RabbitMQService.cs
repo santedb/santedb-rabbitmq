@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using Newtonsoft.Json;
+using SanteDB.Core.Exceptions;
+using SanteDB.Core.Queue;
+using SanteDB.Core.Security;
+using SanteDB.Core.Security.Services;
 using SanteDB.Queue.RabbitMq.Configuration;
 
 namespace SanteDB.Queue.RabbitMq
