@@ -34,10 +34,10 @@ using Newtonsoft.Json;
 
 namespace SanteDB.Queue.RabbitMq
 {
-    public class RabbitMqService2 : IDispatcherQueueManagerService, IDisposable
+    public class RabbitMqService : IDispatcherQueueManagerService, IDisposable
     {
         // Configuration
-        private readonly RabbitMqConfigurationSection2 m_configuration;
+        private readonly RabbitMqConfigurationSection m_configuration;
 
         //need to use this to make request to management interface 
         private readonly HttpClient client = new HttpClient();

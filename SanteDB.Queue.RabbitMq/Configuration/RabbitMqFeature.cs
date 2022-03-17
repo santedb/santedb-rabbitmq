@@ -42,14 +42,14 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// <summary>
         /// Gets the configuration service
         /// </summary>
-        public override Type ConfigurationType => typeof(RabbitMqConfigurationSection2);
+        public override Type ConfigurationType => typeof(RabbitMqConfigurationSection);
 
         /// <summary>
         /// Get the default configuration
         /// </summary>
         protected override object GetDefaultConfiguration()
         {
-            return new RabbitMqConfigurationSection2()
+            return new RabbitMqConfigurationSection()
             {
                 Hostname = "localhost",
                 ExchangeName = "TestExchange",
