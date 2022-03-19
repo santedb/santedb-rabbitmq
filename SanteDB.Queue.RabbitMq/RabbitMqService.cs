@@ -231,9 +231,17 @@ namespace SanteDB.Queue.RabbitMq
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
-            //this should dispose all virtual channels within it as well
-            //need to investigate this further
-            this.m_connection.Dispose();
+            //disposing channels and connection is not enough, they must be closed 
+            if (this.m_channel != null)
+            {
+                this.m_channel.Close();
+                this.m_channel.Dispose();
+            }
+            if (this.m_connection != null)
+            {
+                this.m_connection.Close();
+                this.m_connection.Dispose();
+            }
         }
 
     }
