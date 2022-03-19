@@ -54,6 +54,9 @@ namespace SanteDB.Queue.RabbitMq
         // PEP service
         private readonly IPolicyEnforcementService m_pepService;
 
+        // Consumer tag
+        private string m_consumerTag;
+
         /// <summary>
         /// Gets the service name
         /// </summary>
@@ -109,7 +112,7 @@ namespace SanteDB.Queue.RabbitMq
                     routingKey, message);
 
             };
-            this.m_channel.BasicConsume(queue: queueName,
+            this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
                 autoAck: true,
                 consumer: consumer);
 
@@ -120,10 +123,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public void UnSubscribe(string queueName, DispatcherQueueCallback callback)
         {
-            //possibly could use basic cancel for this 
-            //need to set up a consumer to be able to handle cancel
-            throw new NotImplementedException();
-
+            this.m_channel.BasicCancel(this.m_consumerTag);
         }
 
         /// <summary>
