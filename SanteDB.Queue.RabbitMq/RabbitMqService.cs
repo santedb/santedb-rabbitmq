@@ -28,6 +28,7 @@ using SanteDB.Core.Security.Services;
 using SanteDB.Queue.RabbitMq.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
@@ -214,10 +215,17 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
-            //need to make http request to management api
-
-            return null;
-
+            var clientHandler = new HttpClientHandler { Credentials = this.m_configuration.RabbitMQCredential };
+            var client = new HttpClient(clientHandler);
+            var response = client.GetAsync($"{this.m_configuration.ManagementUri}api/queues").GetAwaiter().GetResult();
+            var json = response.Content.ReadAsStringAsync().Result;
+            var deserializedObjects = JsonConvert.DeserializeAnonymousType(json, new[] { new { Name = "", Messages = 0 } });
+            return deserializedObjects.Select(r => new DispatcherQueueInfo()
+            {
+                Name = r.Name,
+                QueueSize = r.Messages
+            });
+            
         }
 
         /// <summary>
