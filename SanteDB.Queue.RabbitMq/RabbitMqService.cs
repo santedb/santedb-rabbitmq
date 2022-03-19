@@ -40,16 +40,16 @@ namespace SanteDB.Queue.RabbitMq
         // Configuration
         private readonly RabbitMqConfigurationSection m_configuration;
 
-        //need to use this to make request to management interface 
-        private readonly HttpClient client = new HttpClient();
-
         //for creating connection
         private  ConnectionFactory m_connectionFactory;
+
         //connection
         private  IConnection m_connection;
+
         //channel
         private IModel m_channel;
 
+        //routing key
         private string m_routingKey = "t1";
 
         // PEP service
@@ -149,7 +149,6 @@ namespace SanteDB.Queue.RabbitMq
                 throw new DataPersistenceException($"Error enqueueing message to {queueName}", ex);
 
             }
-
         }
 
         /// <summary>
@@ -158,18 +157,15 @@ namespace SanteDB.Queue.RabbitMq
         public DispatcherQueueEntry Dequeue(string queueName)
         {
             //assuming fifo is ok here
-            //we can implement a basic get although this is not recommended at all as per rabbitmq docs
-
+            //we can implement a basic get although this is not recommended
             var result = this.m_channel.BasicGet(queueName, autoAck:true);
 
             //need to find out how this is being used
             return new DispatcherQueueEntry()
             {
-                Body = result.Body,
-                //probably wrong
-                CorrelationId = result.DeliveryTag.ToString()
+                Body = result?.Body,
+                CorrelationId = null
             };
-
         }
 
         /// <summary>
@@ -178,7 +174,7 @@ namespace SanteDB.Queue.RabbitMq
         public DispatcherQueueEntry DequeueById(string queueName, string correlationId)
         {
             //RabbitMQ doesn't support this
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -197,8 +193,7 @@ namespace SanteDB.Queue.RabbitMq
         {
             //RabbitMQ doesn't support this
             //could look into doing this in hacky way later and find out a way to mark it as unsafe
-            throw new NotImplementedException();
-
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -206,7 +201,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public DispatcherQueueEntry GetQueueEntry(string queueName, string correlationId)
         {
-            //no such thing in rabbit mq
+            //not supported in RabbitMQ
             throw new NotSupportedException();
         }
 
@@ -233,7 +228,8 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public IEnumerable<DispatcherQueueEntry> GetQueueEntries(string queueName)
         {
-            throw new NotImplementedException();
+            //not supported in RabbitMQ
+            throw new NotSupportedException();
         }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
@@ -251,7 +247,6 @@ namespace SanteDB.Queue.RabbitMq
                 this.m_connection.Dispose();
             }
         }
-
     }
 }
 
