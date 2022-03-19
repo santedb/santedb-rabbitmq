@@ -19,7 +19,9 @@
  * Date: 2022-03-17
  */
 
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Xml.Serialization;
 using SanteDB.Core.Configuration;
 
@@ -67,6 +69,11 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// </summary>
         public int MaxQueues { get; set; }
 
-        
+        //RabbitMQ server network credentials
+        public NetworkCredential RabbitMQCredential { get; set; }
+
+        //RabbitMQ Management URI
+        public Uri ManagementUri { get; set; }
+
     }
 }

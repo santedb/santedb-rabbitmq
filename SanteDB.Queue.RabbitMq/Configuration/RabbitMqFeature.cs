@@ -21,6 +21,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using SanteDB.Core.Configuration;
 using SanteDB.Core.Configuration.Features;
 
@@ -57,7 +58,9 @@ namespace SanteDB.Queue.RabbitMq.Configuration
                 MessagePersistent = true,
                 LazyQueue = false,
                 MaxMessagesPerQueue = 50_000,
-                MaxQueues = 10
+                MaxQueues = 10,
+                RabbitMQCredential = new NetworkCredential("guest","guest"),
+                ManagementUri = new Uri("http://localhost:15672/")
             };
         }
     }
