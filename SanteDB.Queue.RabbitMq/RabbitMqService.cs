@@ -160,7 +160,7 @@ namespace SanteDB.Queue.RabbitMq
         /// Enqueue the specified data to the persistent queue
         /// </summary>
         public void Enqueue(string queueName, object data)
-        {   
+        {
             //if queue doesn't exist, it will get created
             this.m_channel.QueueDeclare(
                 queue: queueName, durable: this.m_configuration.QueueDurable,
@@ -168,15 +168,26 @@ namespace SanteDB.Queue.RabbitMq
 
             try
             {
-                this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
-                    routingKey: "t1",
-                    basicProperties: null,
-                    Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)));
+                using (var ms = new MemoryStream())
+                {
+                    //additional props
+                    var props = this.m_channel.CreateBasicProperties();
+                    props.Persistent = this.m_configuration.MessagePersistent; //for persistent settings
+                    props.ContentType = data.GetType().AssemblyQualifiedName;
+
+                    //serializer
+                    XmlModelSerializerFactory.Current.CreateSerializer(data.GetType()).Serialize(ms, data);
+
+                    //publish message as byte array
+                    this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
+                        routingKey: "t1",
+                        basicProperties: props,
+                        ms.GetBuffer());
+                }
             }
             catch (Exception ex)
             {
                 throw new DataPersistenceException($"Error enqueueing message to {queueName}", ex);
-
             }
         }
 
