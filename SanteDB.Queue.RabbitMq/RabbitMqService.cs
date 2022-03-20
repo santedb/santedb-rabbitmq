@@ -27,25 +27,31 @@ using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Queue.RabbitMq.Configuration;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using Newtonsoft.Json;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Services;
 
 namespace SanteDB.Queue.RabbitMq
 {
     public class RabbitMqService : IDispatcherQueueManagerService, IDisposable
     {
+        // MSMQ Persistence queue service
+        private Tracer m_tracer = Tracer.GetTracer(typeof(RabbitMqService));
+
         // Configuration
         private readonly RabbitMqConfigurationSection m_configuration;
 
         //for creating connection
-        private  ConnectionFactory m_connectionFactory;
+        private ConnectionFactory m_connectionFactory;
 
         //connection
-        private  IConnection m_connection;
+        private IConnection m_connection;
 
         //channel
         private IModel m_channel;
@@ -58,6 +64,10 @@ namespace SanteDB.Queue.RabbitMq
 
         // Consumer tag
         private string m_consumerTag;
+
+        //received messages
+        private readonly BlockingCollection<DispatcherQueueEntry> receivedMessages = new BlockingCollection<DispatcherQueueEntry>();
+
 
         /// <summary>
         /// Gets the service name
@@ -112,16 +122,27 @@ namespace SanteDB.Queue.RabbitMq
             //establish consumer
             var consumer = new EventingBasicConsumer(this.m_channel);
 
-            //for testing only - remove later
+            // TODO: extract to private method
+            //on receive - 
             consumer.Received += (model, ea) =>
             {
                 var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                var routingKey = ea.RoutingKey;
-                Console.WriteLine(" [x] Received '{0}':'{1}'",
-                    routingKey, message);
-
+                using (var ms = new MemoryStream(body))
+                {
+                    var type = Type.GetType(ea.BasicProperties.ContentType);
+                    var xmlSerializer = XmlModelSerializerFactory.Current.CreateSerializer(type);
+                    this.receivedMessages.TryAdd(new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
+                }
+                try
+                {
+                    callback(new DispatcherMessageEnqueuedInfo(queueName, null));
+                }
+                catch (Exception ex)
+                {
+                    this.m_tracer.TraceError("Error performing callback - {0}", ex);
+                }
             };
+
             this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
                 autoAck: true,
                 consumer: consumer);
