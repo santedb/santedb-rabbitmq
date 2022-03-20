@@ -32,6 +32,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
+using SanteDB.Core.Services;
 
 namespace SanteDB.Queue.RabbitMq
 {
@@ -64,6 +65,14 @@ namespace SanteDB.Queue.RabbitMq
         public string ServiceName => "RabbitMQ Exchange";
 
 
+        /// <summary>
+        /// DI constructor for RabbitMQ
+        /// </summary>
+        public RabbitMqService(IConfigurationManager configurationManager, IPolicyEnforcementService pepService)
+        {
+            this.m_configuration = configurationManager.GetSection<RabbitMqConfigurationSection>();
+            this.m_pepService = pepService;
+        }
 
         /// <summary>
         /// Opens the specified queue name and enables subscriptions
@@ -116,7 +125,6 @@ namespace SanteDB.Queue.RabbitMq
             this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
                 autoAck: true,
                 consumer: consumer);
-
         }
 
         /// <summary>
@@ -220,7 +228,6 @@ namespace SanteDB.Queue.RabbitMq
                 Name = r.Name,
                 QueueSize = r.Messages
             });
-            
         }
 
         /// <summary>
