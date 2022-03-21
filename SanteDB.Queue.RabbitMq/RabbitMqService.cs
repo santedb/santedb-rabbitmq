@@ -275,16 +275,12 @@ namespace SanteDB.Queue.RabbitMq
         public void Dispose()
         {
             //disposing channels and connection is not enough, they must be closed 
-            if (this.m_channel != null)
-            {
-                this.m_channel.Close();
-                this.m_channel.Dispose();
-            }
-            if (this.m_connection != null)
-            {
-                this.m_connection.Close();
-                this.m_connection.Dispose();
-            }
+            this.m_channel?.Close();
+            this.m_channel?.Dispose();
+            
+            this.m_connection?.Close();
+            this.m_connection?.Dispose();
+            
         }
     }
 }
