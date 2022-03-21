@@ -196,16 +196,15 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public DispatcherQueueEntry Dequeue(string queueName)
         {
-            //assuming fifo is ok here
-            //we can implement a basic get although this is not recommended
-            var result = this.m_channel.BasicGet(queueName, autoAck:true);
-
-            //need to find out how this is being used
-            return new DispatcherQueueEntry()
+            try
             {
-                Body = result?.Body,
-                CorrelationId = null
-            };
+                return this.receivedMessages.Take();
+            }
+            catch (Exception e)
+            {
+                throw new DataPersistenceException($"Error de-queueing message from {queueName}", e);
+            }
+
         }
 
         /// <summary>
