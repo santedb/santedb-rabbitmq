@@ -88,7 +88,7 @@ namespace SanteDB.Queue.RabbitMq
         /// Opens the specified queue name and enables subscriptions
         /// </summary>
         public void Open(string queueName)
-        {   
+        {
             this.SetUp();
             //set up queue
             this.m_channel.QueueDeclare(
@@ -153,6 +153,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public void UnSubscribe(string queueName, DispatcherQueueCallback callback)
         {
+            //this may still cause some messages to flow through if in progress
             this.m_channel.BasicCancel(this.m_consumerTag);
         }
 
@@ -287,6 +288,3 @@ namespace SanteDB.Queue.RabbitMq
         }
     }
 }
-
-//note for channels and connections
-//see https://www.cloudamqp.com/blog/part1-rabbitmq-best-practice.html Connections/Channels
