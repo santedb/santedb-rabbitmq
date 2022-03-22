@@ -66,7 +66,8 @@ namespace SanteDB.Queue.RabbitMq
         private string m_consumerTag;
 
         //received messages
-        private readonly BlockingCollection<DispatcherQueueEntry> receivedMessages = new BlockingCollection<DispatcherQueueEntry>();
+        private readonly ConcurrentDictionary<ulong, DispatcherQueueEntry> receivedMessages = new ConcurrentDictionary<ulong, DispatcherQueueEntry>();
+
 
 
         /// <summary>
@@ -107,6 +108,8 @@ namespace SanteDB.Queue.RabbitMq
             this.m_channel = this.m_connection.CreateModel();
             this.m_channel.ExchangeDeclare(exchange: this.m_configuration.ExchangeName,
                 type: "direct");
+            //set up prefetch count (max number of unacknowledged message per consumer)
+            this.m_channel.BasicQos(0, this.m_configuration.MaxUnackedMessages, false);
         }
 
         /// <summary>
@@ -121,7 +124,6 @@ namespace SanteDB.Queue.RabbitMq
 
             //establish consumer
             var consumer = new EventingBasicConsumer(this.m_channel);
-
             // TODO: extract to private method
             //on receive - 
             consumer.Received += (model, ea) =>
@@ -131,7 +133,7 @@ namespace SanteDB.Queue.RabbitMq
                 {
                     var type = Type.GetType(ea.BasicProperties.ContentType);
                     var xmlSerializer = XmlModelSerializerFactory.Current.CreateSerializer(type);
-                    this.receivedMessages.TryAdd(new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
+                    this.receivedMessages.TryAdd(ea.DeliveryTag, new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
                 }
                 try
                 {
@@ -144,12 +146,12 @@ namespace SanteDB.Queue.RabbitMq
             };
 
             this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer);
         }
 
         /// <summary>
-        /// Remove the callback registration
+        /// Unsubscribes the consumer
         /// </summary>
         public void UnSubscribe(string queueName, DispatcherQueueCallback callback)
         {
@@ -199,7 +201,14 @@ namespace SanteDB.Queue.RabbitMq
         {
             try
             {
-                return this.receivedMessages.Take();
+                //take an item out of the dictionary
+                var delveryTagEntryPair = this.receivedMessages.Take(1).FirstOrDefault();
+
+                //acknowledge so that the message gets deleted from queue
+                this.m_channel.BasicAck(delveryTagEntryPair.Key, false);
+
+                return delveryTagEntryPair.Value;
+
             }
             catch (Exception e)
             {

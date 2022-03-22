@@ -69,11 +69,22 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// </summary>
         public int MaxQueues { get; set; }
 
-        //RabbitMQ server network credentials
+        /// <summary>
+        /// Sets maximum number of unacknowledged messages per channel
+        /// </summary>
+        public ushort MaxUnackedMessages { get; set; }
+
+        /// <summary>
+        /// RabbitMQ server network credentials
+        /// </summary>
         public NetworkCredential RabbitMQCredential { get; set; }
 
-        //RabbitMQ Management URI
+        /// <summary>
+        /// RabbitMQ Management URI
+        /// </summary>
         public Uri ManagementUri { get; set; }
+
+
 
     }
 }
