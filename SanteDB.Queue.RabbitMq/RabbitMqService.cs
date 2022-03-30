@@ -65,6 +65,9 @@ namespace SanteDB.Queue.RabbitMq
         // Consumer tag
         private string m_consumerTag;
 
+        //delivery tag
+        private ulong deliveryTag;
+
         //received messages
         private readonly ConcurrentDictionary<ulong, DispatcherQueueEntry> receivedMessages = new ConcurrentDictionary<ulong, DispatcherQueueEntry>();
 
@@ -90,7 +93,11 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public void Open(string queueName)
         {
-            this.SetUp();
+            if (this.m_channel == null)
+            {
+                this.SetUp();
+            }
+            
             //set up queue
             this.m_channel.QueueDeclare(
                 queue: queueName, durable: this.m_configuration.QueueDurable,
@@ -108,8 +115,9 @@ namespace SanteDB.Queue.RabbitMq
             this.m_channel = this.m_connection.CreateModel();
             this.m_channel.ExchangeDeclare(exchange: this.m_configuration.ExchangeName,
                 type: "direct");
-            //set up prefetch count (max number of unacknowledged message per consumer)
-            this.m_channel.BasicQos(0, this.m_configuration.MaxUnackedMessages, false);
+            //set up prefetch count (max number of unacknowledged message per consumer
+            this.m_channel.BasicQos(0, 1, false);
+
         }
 
         /// <summary>
@@ -120,7 +128,7 @@ namespace SanteDB.Queue.RabbitMq
             //subscribe to queues here
             //note: as soon as this happens, this consumer will start getting messages.
             this.m_channel.QueueBind(queue: queueName,
-                exchange: this.m_configuration.ExchangeName, routingKey: this.m_routingKey);
+                exchange: this.m_configuration.ExchangeName, routingKey: queueName);
 
             //establish consumer
             var consumer = new EventingBasicConsumer(this.m_channel);
@@ -137,12 +145,15 @@ namespace SanteDB.Queue.RabbitMq
                 }
                 try
                 {
+                    this.deliveryTag = ea.DeliveryTag;
                     callback(new DispatcherMessageEnqueuedInfo(queueName, null));
                 }
                 catch (Exception ex)
                 {
                     this.m_tracer.TraceError("Error performing callback - {0}", ex);
                 }
+
+                this.m_channel.BasicAck(ea.DeliveryTag, false);
             };
 
             this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
@@ -183,7 +194,7 @@ namespace SanteDB.Queue.RabbitMq
 
                     //publish message as byte array
                     this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
-                        routingKey: "t1",
+                        routingKey: queueName,
                         basicProperties: props,
                         ms.GetBuffer());
                 }
@@ -202,12 +213,9 @@ namespace SanteDB.Queue.RabbitMq
             try
             {
                 //take an item out of the dictionary
-                var delveryTagEntryPair = this.receivedMessages.Take(1).FirstOrDefault();
-
+                var deliveryTagEntryPair = this.receivedMessages.TryRemove(this.deliveryTag, out var queueEntry);
                 //acknowledge so that the message gets deleted from queue
-                this.m_channel.BasicAck(delveryTagEntryPair.Key, false);
-
-                return delveryTagEntryPair.Value;
+                return queueEntry;
 
             }
             catch (Exception e)
