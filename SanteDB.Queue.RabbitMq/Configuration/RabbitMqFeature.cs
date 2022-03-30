@@ -60,8 +60,9 @@ namespace SanteDB.Queue.RabbitMq.Configuration
                 MaxMessagesPerQueue = 50_000,
                 MaxQueues = 10,
                 MaxUnackedMessages = 10,
-                RabbitMQCredential = new NetworkCredential("guest","guest"),
-                ManagementUri = new Uri("http://localhost:15672/")
+                Username = "guest",
+                Password = "guest",
+                ManagementUri = "http://localhost:15672/"
             };
         }
     }

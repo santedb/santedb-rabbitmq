@@ -20,6 +20,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Xml.Serialization;
@@ -37,52 +38,83 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// <summary>
         /// Host to connect to 
         /// </summary>
+        [XmlAttribute("hostname")]
+        [DisplayName("Host Name")]
+        [Description("Name of host where RabbitMQ resides")]
         public string Hostname { get; set; }
 
         /// <summary>
         /// Exchange name
         /// </summary>
+        [XmlAttribute("exchangeName")]
+        [DisplayName("Exchange Name")]
+        [Description("Name of Exchange")]
         public string ExchangeName { get; set; }
 
         /// <summary>
         /// Enables Queues to persist and survive exchange server restart
         /// </summary>
+        [XmlAttribute("durable")]
+        [DisplayName("Queue Durable")]
+        [Description("Sets Queue Durability")]
         public bool QueueDurable { get; set; }
 
         /// <summary>
         /// Enables persistence of messages
         /// </summary>
+        [XmlAttribute("messagePersistence")]
+        [DisplayName("Message Persistent")]
+        [Description("Sets message persistence")]
         public bool MessagePersistent { get; set; }
 
         /// <summary>
         /// Enables Lazy Queue and moves content of queue to disk as soon as practically possible
         /// </summary>
+        [XmlAttribute("lazy")]
+        [DisplayName("Lazy Queue")]
+        [Description("Sets the lazy queue setting")]
         public bool LazyQueue { get; set; }
 
         /// <summary>
         /// Sets maximum number of messages per queue
         /// </summary>
+        [XmlAttribute("maxMessagesPerQueue")]
+        [DisplayName("Max Messages Per Queue")]
+        [Description("Sets the maximum number of messages per Queue")]
         public int MaxMessagesPerQueue { get; set; }
 
         /// <summary>
         /// Sets maximum number of queues 
         /// </summary>
+        [XmlAttribute("maxQueues")]
+        [DisplayName("Max Queues")]
+        [Description("Sets the maximum number of queues")]
         public int MaxQueues { get; set; }
 
         /// <summary>
         /// Sets maximum number of unacknowledged messages per channel
         /// </summary>
+        [XmlAttribute("maxUnackedMessageLimit")]
+        [DisplayName("Max Unacked Messages")]
+        [Description("Sets the maximum number of queues")]
         public ushort MaxUnackedMessages { get; set; }
 
         /// <summary>
-        /// RabbitMQ server network credentials
+        /// RabbitMQ server network username
         /// </summary>
-        public NetworkCredential RabbitMQCredential { get; set; }
+        [XmlIgnore]
+        public string Username { get; set; }
 
+        /// <summary>
+        /// RabbitMQ server network password
+        /// </summary>
+        [XmlIgnore]
+        public string Password { get; set; }
         /// <summary>
         /// RabbitMQ Management URI
         /// </summary>
-        public Uri ManagementUri { get; set; }
+        [XmlIgnore]
+        public string ManagementUri { get; set; } = "http://localhost:15672/";
 
 
 

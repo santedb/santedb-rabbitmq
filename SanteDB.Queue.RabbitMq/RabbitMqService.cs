@@ -31,6 +31,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
 using SanteDB.Core.Diagnostics;
@@ -55,9 +56,6 @@ namespace SanteDB.Queue.RabbitMq
 
         //channel
         private IModel m_channel;
-
-        //routing key
-        private string m_routingKey = "t1";
 
         // PEP service
         private readonly IPolicyEnforcementService m_pepService;
@@ -267,7 +265,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
-            var clientHandler = new HttpClientHandler { Credentials = this.m_configuration.RabbitMQCredential };
+            var clientHandler = new HttpClientHandler { Credentials = new NetworkCredential(this.m_configuration.Username, this.m_configuration.Password)};
             var client = new HttpClient(clientHandler);
             var response = client.GetAsync($"{this.m_configuration.ManagementUri}api/queues").GetAwaiter().GetResult();
             var json = response.Content.ReadAsStringAsync().Result;
