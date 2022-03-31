@@ -98,12 +98,11 @@ namespace SanteDB.Queue.RabbitMq
                 this.SetUp();
             }
 
-            //set up queue
-            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false, false);
+            this.OpenQueue(queueName);
         }
 
         /// <summary>
-        /// Sets up connection and channels
+        /// Sets up connection, exchange and channels
         /// </summary>
         private void SetUp()
         {
@@ -114,6 +113,17 @@ namespace SanteDB.Queue.RabbitMq
             this.m_channel.ExchangeDeclare(this.m_configuration.ExchangeName, "direct");
             //set up prefetch count (max number of unacknowledged message per consumer
             this.m_channel.BasicQos(0, this.m_configuration.MaxUnackedMessages, false);
+        }
+
+        /// <summary>
+        /// Sets up a queue
+        /// </summary>
+        /// <param name="queueName"></param>
+        private void OpenQueue(string queueName)
+        {
+            Dictionary<string, object> args = this.m_configuration.LazyQueue ? new Dictionary<string, object>(){{"x-queue-mode", "lazy"}} : null;
+            //creates queue if it doesn't exist
+            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false, false, args);
         }
 
         /// <summary>
@@ -166,8 +176,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public void Enqueue(string queueName, object data)
         {
-            //if queue doesn't exist, it will get created
-            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false,  false);
+            this.Open(queueName);
 
             try
             {
