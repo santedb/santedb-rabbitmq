@@ -246,9 +246,8 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public DispatcherQueueEntry Move(DispatcherQueueEntry entry, string toQueue)
         {
-            //RabbitMQ doesn't support this
-            //could look into doing this in hacky way later and find out a way to mark it as unsafe
-            throw new NotSupportedException();
+            this.Enqueue(toQueue, entry.Body);
+            return entry;
         }
 
         /// <summary>
