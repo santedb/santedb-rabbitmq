@@ -268,8 +268,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public IEnumerable<DispatcherQueueEntry> GetQueueEntries(string queueName)
         {
-            //not supported in RabbitMQ
-            throw new NotSupportedException();
+            throw new NotSupportedException("This operation is not supported in RabbitMQ");
         }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
