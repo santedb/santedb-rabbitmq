@@ -70,7 +70,8 @@ namespace SanteDB.Queue.RabbitMq
         //received messages
         private readonly ConcurrentDictionary<ulong, DispatcherQueueEntry> receivedMessages = new ConcurrentDictionary<ulong, DispatcherQueueEntry>();
 
-
+        //http client
+        private static readonly HttpClient client = new HttpClient();
 
         /// <summary>
         /// Gets the service name
@@ -96,11 +97,9 @@ namespace SanteDB.Queue.RabbitMq
             {
                 this.SetUp();
             }
-            
+
             //set up queue
-            this.m_channel.QueueDeclare(
-                queue: queueName, durable: this.m_configuration.QueueDurable,
-                exclusive: false, autoDelete: false);
+            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false, false);
         }
 
         /// <summary>
@@ -112,11 +111,9 @@ namespace SanteDB.Queue.RabbitMq
             this.m_connectionFactory = new ConnectionFactory() { HostName = this.m_configuration.Hostname };
             this.m_connection = this.m_connectionFactory.CreateConnection();
             this.m_channel = this.m_connection.CreateModel();
-            this.m_channel.ExchangeDeclare(exchange: this.m_configuration.ExchangeName,
-                type: "direct");
+            this.m_channel.ExchangeDeclare(this.m_configuration.ExchangeName, "direct");
             //set up prefetch count (max number of unacknowledged message per consumer
-            this.m_channel.BasicQos(0, 1, false);
-
+            this.m_channel.BasicQos(0, this.m_configuration.MaxUnackedMessages, false);
         }
 
         /// <summary>
@@ -126,8 +123,7 @@ namespace SanteDB.Queue.RabbitMq
         {
             //subscribe to queues here
             //note: as soon as this happens, this consumer will start getting messages.
-            this.m_channel.QueueBind(queue: queueName,
-                exchange: this.m_configuration.ExchangeName, routingKey: queueName);
+            this.m_channel.QueueBind(queueName, this.m_configuration.ExchangeName, queueName);
 
             //establish consumer
             var consumer = new EventingBasicConsumer(this.m_channel);
@@ -135,15 +131,15 @@ namespace SanteDB.Queue.RabbitMq
             //on receive - 
             consumer.Received += (model, ea) =>
             {
-                var body = ea.Body.ToArray();
-                using (var ms = new MemoryStream(body))
-                {
-                    var type = Type.GetType(ea.BasicProperties.ContentType);
-                    var xmlSerializer = XmlModelSerializerFactory.Current.CreateSerializer(type);
-                    this.receivedMessages.TryAdd(ea.DeliveryTag, new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
-                }
                 try
                 {
+                    var body = ea.Body.ToArray();
+                    using (var ms = new MemoryStream(body))
+                    {
+                        var type = Type.GetType(ea.BasicProperties.ContentType);
+                        var xmlSerializer = XmlModelSerializerFactory.Current.CreateSerializer(type);
+                        this.receivedMessages.TryAdd(ea.DeliveryTag, new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
+                    }
                     this.deliveryTag = ea.DeliveryTag;
                     callback(new DispatcherMessageEnqueuedInfo(queueName, null));
                 }
@@ -151,13 +147,9 @@ namespace SanteDB.Queue.RabbitMq
                 {
                     this.m_tracer.TraceError("Error performing callback - {0}", ex);
                 }
-
-                this.m_channel.BasicAck(ea.DeliveryTag, false);
             };
 
-            this.m_consumerTag = this.m_channel.BasicConsume(queue: queueName,
-                autoAck: false,
-                consumer: consumer);
+            this.m_consumerTag = this.m_channel.BasicConsume(queueName, false, consumer);
         }
 
         /// <summary>
@@ -175,9 +167,7 @@ namespace SanteDB.Queue.RabbitMq
         public void Enqueue(string queueName, object data)
         {
             //if queue doesn't exist, it will get created
-            this.m_channel.QueueDeclare(
-                queue: queueName, durable: this.m_configuration.QueueDurable,
-                exclusive: false, autoDelete: false);
+            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false,  false);
 
             try
             {
@@ -187,15 +177,10 @@ namespace SanteDB.Queue.RabbitMq
                     var props = this.m_channel.CreateBasicProperties();
                     props.Persistent = this.m_configuration.MessagePersistent; //for persistent settings
                     props.ContentType = data.GetType().AssemblyQualifiedName;
-
-                    //serializer
                     XmlModelSerializerFactory.Current.CreateSerializer(data.GetType()).Serialize(ms, data);
 
                     //publish message as byte array
-                    this.m_channel.BasicPublish(exchange: this.m_configuration.ExchangeName,
-                        routingKey: queueName,
-                        basicProperties: props,
-                        ms.GetBuffer());
+                    this.m_channel.BasicPublish(this.m_configuration.ExchangeName, queueName, props, ms.GetBuffer());
                 }
             }
             catch (Exception ex)
@@ -212,10 +197,13 @@ namespace SanteDB.Queue.RabbitMq
             try
             {
                 //take an item out of the dictionary
-                var deliveryTagEntryPair = this.receivedMessages.TryRemove(this.deliveryTag, out var queueEntry);
+                if (this.receivedMessages.TryRemove(this.deliveryTag, out var queueEntry))
+                {
+                    this.m_channel.BasicAck(this.deliveryTag, false);
+                    return queueEntry;
+                }
+                return null;
                 //acknowledge so that the message gets deleted from queue
-                return queueEntry;
-
             }
             catch (Exception e)
             {
@@ -256,8 +244,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public DispatcherQueueEntry GetQueueEntry(string queueName, string correlationId)
         {
-            //not supported in RabbitMQ
-            throw new NotSupportedException();
+            throw new NotSupportedException("This operation is not supported in RabbitMQ");
         }
 
         /// <summary>
@@ -291,10 +278,10 @@ namespace SanteDB.Queue.RabbitMq
             //disposing channels and connection is not enough, they must be closed 
             this.m_channel?.Close();
             this.m_channel?.Dispose();
-            
+
             this.m_connection?.Close();
             this.m_connection?.Dispose();
-            
+
         }
     }
 }

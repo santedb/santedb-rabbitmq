@@ -102,13 +102,13 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// <summary>
         /// RabbitMQ server network username
         /// </summary>
-        [XmlIgnore]
+        [XmlAttribute("username")]
         public string Username { get; set; }
 
         /// <summary>
         /// RabbitMQ server network password
         /// </summary>
-        [XmlIgnore]
+        [XmlAttribute("password")]
         public string Password { get; set; }
         /// <summary>
         /// RabbitMQ Management URI

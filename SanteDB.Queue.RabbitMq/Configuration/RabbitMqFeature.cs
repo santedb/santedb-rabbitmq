@@ -33,7 +33,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// <summary>
         /// Gets the name of the queue
         /// </summary>
-        public override string Name => "RabbmitMQ1";
+        public override string Name => "RabbitMQ";
         
         /// <summary>
         /// Gets the group 
@@ -50,20 +50,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// </summary>
         protected override object GetDefaultConfiguration()
         {
-            return new RabbitMqConfigurationSection()
-            {
-                Hostname = "localhost",
-                ExchangeName = "TestExchange",
-                QueueDurable = true,
-                MessagePersistent = true,
-                LazyQueue = false,
-                MaxMessagesPerQueue = 50_000,
-                MaxQueues = 10,
-                MaxUnackedMessages = 10,
-                Username = "guest",
-                Password = "guest",
-                ManagementUri = "http://localhost:15672/"
-            };
+            return new RabbitMqConfigurationSection();
         }
     }
 }
