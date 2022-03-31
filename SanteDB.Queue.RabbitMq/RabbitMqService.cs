@@ -31,8 +31,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using Newtonsoft.Json;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Serialization;
@@ -264,9 +265,8 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
-            var clientHandler = new HttpClientHandler { Credentials = new NetworkCredential(this.m_configuration.Username, this.m_configuration.Password)};
-            var client = new HttpClient(clientHandler);
-            var response = client.GetAsync($"{this.m_configuration.ManagementUri}api/queues").GetAwaiter().GetResult();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{this.m_configuration.Username}:{this.m_configuration.Password}")));
+            var response = client.GetAsync($"{this.m_configuration.ManagementUri}api/queues").Result;
             var json = response.Content.ReadAsStringAsync().Result;
             var deserializedObjects = JsonConvert.DeserializeAnonymousType(json, new[] { new { Name = "", Messages = 0 } });
             return deserializedObjects.Select(r => new DispatcherQueueInfo()
