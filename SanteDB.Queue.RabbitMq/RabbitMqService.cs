@@ -107,11 +107,17 @@ namespace SanteDB.Queue.RabbitMq
         private void SetUp()
         {
             //set up connection, exchange and channel
-            this.m_connectionFactory = new ConnectionFactory() { HostName = this.m_configuration.Hostname };
+            this.m_connectionFactory = new ConnectionFactory()
+            {
+                HostName = this.m_configuration.Hostname, 
+                VirtualHost = this.m_configuration.VirtualHost,
+                UserName = this.m_configuration.Username,
+                Password = this.m_configuration.Password
+            };
             this.m_connection = this.m_connectionFactory.CreateConnection();
             this.m_channel = this.m_connection.CreateModel();
             this.m_channel.ExchangeDeclare(this.m_configuration.ExchangeName, "direct");
-            //set up prefetch count (max number of unacknowledged message per consumer
+            //set up prefetch count (max number of unacknowledged message per consumer)
             this.m_channel.BasicQos(0, this.m_configuration.MaxUnackedMessages, false);
         }
 

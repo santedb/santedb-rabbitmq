@@ -51,6 +51,15 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [Description("Name of Exchange")]
         public string ExchangeName { get; set; }
 
+
+        /// <summary>
+        /// Virtual host
+        /// </summary>
+        [XmlAttribute("virtualHost")]
+        [DisplayName("virtualHost")]
+        [Description("Virtual Host")]
+        public string VirtualHost { get; set; }
+
         /// <summary>
         /// Enables Queues to persist and survive exchange server restart
         /// </summary>
