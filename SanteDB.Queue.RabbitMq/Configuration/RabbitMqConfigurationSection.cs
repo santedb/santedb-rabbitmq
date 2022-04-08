@@ -76,27 +76,11 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         public bool LazyQueue { get; set; }
 
         /// <summary>
-        /// Sets maximum number of messages per queue
-        /// </summary>
-        [XmlAttribute("maxMessagesPerQueue")]
-        [DisplayName("Max Messages Per Queue")]
-        [Description("Sets the maximum number of messages per Queue")]
-        public int MaxMessagesPerQueue { get; set; }
-
-        /// <summary>
-        /// Sets maximum number of queues 
-        /// </summary>
-        [XmlAttribute("maxQueues")]
-        [DisplayName("Max Queues")]
-        [Description("Sets the maximum number of queues")]
-        public int MaxQueues { get; set; }
-
-        /// <summary>
         /// Sets maximum number of unacknowledged messages per channel
         /// </summary>
         [XmlAttribute("maxUnackedMessageLimit")]
         [DisplayName("Max Unacked Messages")]
-        [Description("Sets the maximum number of queues")]
+        [Description("The maximum number of unacknowledged messsages")]
         public ushort MaxUnackedMessages { get; set; }
 
         /// <summary>
