@@ -138,7 +138,7 @@ namespace SanteDB.Queue.RabbitMq
         public void SubscribeTo(string queueName, DispatcherQueueCallback callback)
         {
             //subscribe to queues here
-            //note: as soon as this happens, this consumer will start getting messages.
+            //note: as soon as this happens, this consumer will start getting messages if any, since this is a "push" API
             this.m_channel.QueueBind(queueName, this.m_configuration.ExchangeName, queueName);
 
             //establish consumer
@@ -154,6 +154,8 @@ namespace SanteDB.Queue.RabbitMq
                     {
                         var type = Type.GetType(ea.BasicProperties.ContentType);
                         var xmlSerializer = XmlModelSerializerFactory.Current.CreateSerializer(type);
+                        //add received message to thread safe dictionary where the key is the delivery tag
+                        //the delivery tag will be needed in dequeue to acknowledge the message 
                         this.receivedMessages.TryAdd(ea.DeliveryTag, new DispatcherQueueEntry(null, queueName, DateTime.Now, ea.BasicProperties.ContentType, xmlSerializer.Deserialize(ms)));
                     }
                     this.deliveryTag = ea.DeliveryTag;
@@ -214,11 +216,11 @@ namespace SanteDB.Queue.RabbitMq
                 //take an item out of the dictionary
                 if (this.receivedMessages.TryRemove(this.deliveryTag, out var queueEntry))
                 {
+                    //acknowledge so that the message gets deleted from queue
                     this.m_channel.BasicAck(this.deliveryTag, false);
                     return queueEntry;
                 }
                 return null;
-                //acknowledge so that the message gets deleted from queue
             }
             catch (Exception e)
             {
