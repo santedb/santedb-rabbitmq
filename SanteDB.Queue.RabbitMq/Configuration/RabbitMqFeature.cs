@@ -50,7 +50,19 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// </summary>
         protected override object GetDefaultConfiguration()
         {
-            return new RabbitMqConfigurationSection();
+            return new RabbitMqConfigurationSection()
+            {
+                Hostname = "localhost",
+                Username = "admin",
+                Password = "admin",
+                ExchangeName = "SanteExc01",
+                QueueDurable = true,
+                MessagePersistent = true,
+                LazyQueue = false,
+                MaxUnackedMessages = 1,
+                VirtualHost = "/",
+                ManagementApiTimeout = 500,
+            };
         }
     }
 }
