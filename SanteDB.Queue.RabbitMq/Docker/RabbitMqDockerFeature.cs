@@ -134,7 +134,6 @@ namespace SanteDB.Queue.RabbitMq.Docker
                 mgmtApiTimeout = "500";
             }
 
-
             // Parse to make sure appropriate values were provided
             if(!Boolean.TryParse(durable, out bool validatedDurableSetting))
             {
@@ -157,8 +156,6 @@ namespace SanteDB.Queue.RabbitMq.Docker
                 throw new ConfigurationException($"mgmtApiTimeout = {validatedMgmtApiTimeout} is not understood as a integer value", configuration);
             }
 
-
-
             // Rabbitmq Config
             var rabbitMqSetting = configuration.GetSection<RabbitMqConfigurationSection>();
 
@@ -171,7 +168,6 @@ namespace SanteDB.Queue.RabbitMq.Docker
             }
 
             rabbitMqSetting.Hostname = hostname;
-
             rabbitMqSetting.VirtualHost = virtualHost;
             rabbitMqSetting.Username = username;
             rabbitMqSetting.Password = password;
@@ -182,7 +178,6 @@ namespace SanteDB.Queue.RabbitMq.Docker
             rabbitMqSetting.LazyQueue = validatedLazySetting;
             rabbitMqSetting.ManagementApiTimeout = validatedMgmtApiTimeout;
             
-
             // Add services
             var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
             serviceConfiguration.AddRange(serviceTypes.Where(t => !serviceConfiguration.Any(c => c.Type == t)).Select(t => new TypeReferenceConfiguration(t)));
