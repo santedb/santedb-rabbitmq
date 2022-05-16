@@ -306,7 +306,7 @@ namespace SanteDB.Queue.RabbitMq
             var response = new HttpResponseMessage();
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(this.m_configuration.ManagementApiTimeout); 
-            using (var requestTask = Task.Run(async () => { return await client.GetAsync($"{this.m_configuration.ManagementUri}api/queues"); }, cancellationTokenSource.Token))
+            using (var requestTask = Task.Run(async () => await client.GetAsync($"{this.m_configuration.ManagementUri}api/queues"), cancellationTokenSource.Token))
             {
                 try
                 {
@@ -328,7 +328,7 @@ namespace SanteDB.Queue.RabbitMq
             cancellationTokenSource = new CancellationTokenSource();
             string json = String.Empty;
             cancellationTokenSource.CancelAfter(1000);
-            using (var requestTask = Task.Run(async () => { return await response.Content.ReadAsStringAsync(); }, cancellationTokenSource.Token))
+            using (var requestTask = Task.Run(async () => await response.Content.ReadAsStringAsync(), cancellationTokenSource.Token))
             {
                 try
                 {
