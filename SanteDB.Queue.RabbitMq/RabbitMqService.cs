@@ -137,7 +137,15 @@ namespace SanteDB.Queue.RabbitMq
         {
             Dictionary<string, object> args = this.m_configuration.LazyQueue ? new Dictionary<string, object>(){{"x-queue-mode", "lazy"}} : null;
             //creates queue if it doesn't exist
-            this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false, false, args);
+            try
+            {
+                this.m_channel.QueueDeclare(queueName, this.m_configuration.QueueDurable, false, false, args);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error opening queue {queueName}", e);
+            }
+            
         }
 
         /// <summary>
@@ -184,7 +192,15 @@ namespace SanteDB.Queue.RabbitMq
         public void UnSubscribe(string queueName, DispatcherQueueCallback callback)
         {
             //this may still cause some messages to flow through if in progress
-            this.m_channel.BasicCancel(this.m_consumerTag);
+            try
+            {
+                this.m_channel.BasicCancel(this.m_consumerTag);
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceError($"Error unsubscribing from {queueName}", e);
+            }
+        
         }
 
         /// <summary>
@@ -250,8 +266,16 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public void Purge(string queueName)
         {
-            this.m_pepService.Demand(PermissionPolicyIdentifiers.ManageDispatcherQueues);
-            this.m_channel.QueueDelete(queueName);
+            try
+            {
+                this.m_pepService.Demand(PermissionPolicyIdentifiers.ManageDispatcherQueues);
+                this.m_channel.QueueDelete(queueName);
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceError($"Error purging queue {queueName}", e);
+            }
+            
         }
 
         /// <summary>
