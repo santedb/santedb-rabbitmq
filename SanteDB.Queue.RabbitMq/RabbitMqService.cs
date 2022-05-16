@@ -41,6 +41,12 @@ using SanteDB.Core.Services;
 
 namespace SanteDB.Queue.RabbitMq
 {
+    /// <summary>
+    /// An implementation of the <see cref="IDispatcherQueueManagerService"/> which uses RabbitMQ as the queue managing service
+    /// </summary>
+    /// <remarks>
+    /// <para>This queue service uses RabbitMQ to manage queues and loading/unloading of items to queues.</para>
+    /// </remarks>
     public class RabbitMqService : IDispatcherQueueManagerService, IDisposable
     {
         // MSMQ Persistence queue service
@@ -143,8 +149,8 @@ namespace SanteDB.Queue.RabbitMq
 
             //establish consumer
             var consumer = new EventingBasicConsumer(this.m_channel);
-            // TODO: extract to private method
-            //on receive - 
+
+            //on receive 
             consumer.Received += (model, ea) =>
             {
                 try
@@ -185,7 +191,6 @@ namespace SanteDB.Queue.RabbitMq
         public void Enqueue(string queueName, object data)
         {
             this.Open(queueName);
-
             try
             {
                 using (var ms = new MemoryStream())
