@@ -109,6 +109,16 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlIgnore]
         public string ManagementUri { get; set; } = "http://localhost:15672/";
 
+        /// <summary>
+        /// Sets timeout value in  milliseconds for when requesting response from management api
+        /// </summary>
+        [XmlAttribute("mgmtApiTimeout")]
+        [DisplayName("Management Api Timeout")]
+        [Description("Timeout value in milliseconds for when requesting response from management api")]
+        public int ManagementApiTimeout { get; set; } 
+
+
+
 
 
     }

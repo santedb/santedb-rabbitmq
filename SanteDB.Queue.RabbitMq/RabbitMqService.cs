@@ -34,6 +34,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Serialization;
@@ -275,8 +277,45 @@ namespace SanteDB.Queue.RabbitMq
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{this.m_configuration.Username}:{this.m_configuration.Password}")));
-            var response = client.GetAsync($"{this.m_configuration.ManagementUri}api/queues").Result;
-            var json = response.Content.ReadAsStringAsync().Result;
+            
+            //request all queues from management api
+            var response = new HttpResponseMessage();
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.CancelAfter(this.m_configuration.ManagementApiTimeout); 
+            using (var requestTask = Task.Run(async () => { return await client.GetAsync($"{this.m_configuration.ManagementUri}api/queues"); }, cancellationTokenSource.Token))
+            {
+                try
+                {
+                    response = requestTask.Result;
+                }
+                catch (AggregateException e)
+                {
+                    client.CancelPendingRequests();
+                    this.m_tracer.TraceError($"Error connecting to {this.m_configuration.ManagementUri}api/queues", e);
+                }
+                catch (TaskCanceledException e)
+                {
+                    client.CancelPendingRequests();
+                    this.m_tracer.TraceError($"Task was cancelled while connecting to {this.m_configuration.ManagementUri}api/queues", e);
+                }
+            }
+
+            //read response content
+            cancellationTokenSource = new CancellationTokenSource();
+            string json = String.Empty;
+            cancellationTokenSource.CancelAfter(1000);
+            using (var requestTask = Task.Run(async () => { return await response.Content.ReadAsStringAsync(); }, cancellationTokenSource.Token))
+            {
+                try
+                {
+                    json = requestTask.Result;
+                }
+                catch (AggregateException e)
+                {
+                   this.m_tracer.TraceError($"Error reading json content {json}", e);
+                }
+            }
+
             var deserializedObjects = JsonConvert.DeserializeAnonymousType(json, new[] { new { Name = "", Messages = 0 } });
             return deserializedObjects.Select(r => new DispatcherQueueInfo()
             {
