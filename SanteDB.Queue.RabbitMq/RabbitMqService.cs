@@ -92,7 +92,7 @@ namespace SanteDB.Queue.RabbitMq
         /// </summary>
         public RabbitMqService(IConfigurationManager configurationManager, IPolicyEnforcementService pepService)
         {
-            this.m_configuration = configurationManager.GetSection<RabbitMqConfigurationSection>();
+            this.m_configuration = configurationManager.GetSection<RabbitMqConfigurationSection>() ?? new RabbitMqConfigurationSection();
             this.m_pepService = pepService;
         }
 
@@ -145,7 +145,6 @@ namespace SanteDB.Queue.RabbitMq
             {
                 throw new Exception($"Error opening queue {queueName}", e);
             }
-            
         }
 
         /// <summary>
@@ -199,8 +198,7 @@ namespace SanteDB.Queue.RabbitMq
             catch (Exception e)
             {
                 this.m_tracer.TraceError($"Error unsubscribing from {queueName}", e);
-            }
-        
+            }        
         }
 
         /// <summary>
@@ -249,7 +247,6 @@ namespace SanteDB.Queue.RabbitMq
             {
                 throw new DataPersistenceException($"Error de-queueing message from {queueName}", e);
             }
-
         }
 
         /// <summary>
@@ -274,8 +271,7 @@ namespace SanteDB.Queue.RabbitMq
             catch (Exception e)
             {
                 this.m_tracer.TraceError($"Error purging queue {queueName}", e);
-            }
-            
+            }            
         }
 
         /// <summary>
@@ -365,7 +361,6 @@ namespace SanteDB.Queue.RabbitMq
 
             this.m_connection?.Close();
             this.m_connection?.Dispose();
-
         }
     }
 }

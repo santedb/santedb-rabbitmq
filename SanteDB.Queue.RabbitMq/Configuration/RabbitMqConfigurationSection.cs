@@ -41,7 +41,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("hostname")]
         [DisplayName("Host Name")]
         [Description("Name of host where RabbitMQ resides")]
-        public string Hostname { get; set; }
+        public string Hostname { get; set; } = "localhost";
 
         /// <summary>
         /// Exchange name
@@ -49,7 +49,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("exchangeName")]
         [DisplayName("Exchange Name")]
         [Description("Name of Exchange")]
-        public string ExchangeName { get; set; }
+        public string ExchangeName { get; set; } = "SanteExc01";
 
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("virtualHost")]
         [DisplayName("virtualHost")]
         [Description("Virtual Host")]
-        public string VirtualHost { get; set; }
+        public string VirtualHost { get; set; } = "/";
 
         /// <summary>
         /// Enables Queues to persist and survive exchange server restart
@@ -66,7 +66,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("durable")]
         [DisplayName("Queue Durable")]
         [Description("Sets Queue Durability")]
-        public bool QueueDurable { get; set; }
+        public bool QueueDurable { get; set; } = true;
 
         /// <summary>
         /// Enables persistence of messages
@@ -74,7 +74,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("messagePersistence")]
         [DisplayName("Message Persistent")]
         [Description("Sets message persistence")]
-        public bool MessagePersistent { get; set; }
+        public bool MessagePersistent { get; set; } = true;
 
         /// <summary>
         /// Enables Lazy Queue and moves content of queue to disk as soon as practically possible
@@ -82,7 +82,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("lazy")]
         [DisplayName("Lazy Queue")]
         [Description("Sets the lazy queue setting")]
-        public bool LazyQueue { get; set; }
+        public bool LazyQueue { get; set; } = true;
 
         /// <summary>
         /// Sets maximum number of unacknowledged messages per channel
@@ -90,36 +90,34 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("maxUnackedMessageLimit")]
         [DisplayName("Max Unacked Messages")]
         [Description("The maximum number of unacknowledged messsages")]
-        public ushort MaxUnackedMessages { get; set; }
+        public ushort MaxUnackedMessages { get; set; } = 1;
 
         /// <summary>
         /// RabbitMQ server network username
         /// </summary>
         [XmlAttribute("username")]
-        public string Username { get; set; }
+        public string Username { get; set; } = "guest";
 
         /// <summary>
         /// RabbitMQ server network password
         /// </summary>
         [XmlAttribute("password")]
-        public string Password { get; set; }
+        public string Password { get; set; } = "guest";
+
         /// <summary>
         /// RabbitMQ Management URI
         /// </summary>
-        [XmlIgnore]
+        [XmlAttribute("managementUri")]
+        [DisplayName("Management Uri")]
+        [Description("Management API Uri")]
         public string ManagementUri { get; set; } = "http://localhost:15672/";
 
         /// <summary>
         /// Sets timeout value in  milliseconds for when requesting response from management api
         /// </summary>
-        [XmlAttribute("mgmtApiTimeout")]
+        [XmlAttribute("managementApiTimeout")]
         [DisplayName("Management Api Timeout")]
         [Description("Timeout value in milliseconds for when requesting response from management api")]
-        public int ManagementApiTimeout { get; set; } 
-
-
-
-
-
+        public int ManagementApiTimeout { get; set; }  = 500;
     }
 }
