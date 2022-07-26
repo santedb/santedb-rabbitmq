@@ -40,7 +40,8 @@ namespace SanteDB.Queue.RabbitMq.Docker
         public const string LazyQueue = "lazy";
         public const string MaxUnackedMessages = "maxUnackedMessageLimit";
         public const string VirtualHost = "virtualHost";
-        public const string ManagementApiTimeout = "mgmtApiTimeout";
+        public const string ManagementApiTimeout = "managementApiTimeout";
+        public const string ManagementUri = "managementUri";
 
         /// <summary>
         /// Gets the identifier of the feature
@@ -67,7 +68,7 @@ namespace SanteDB.Queue.RabbitMq.Docker
         /// </remarks>
         public IEnumerable<string> Settings => new String[]
         {
-            Hostname, Username, Password, ExchangeName, QueueDurable, MessagePersistent, LazyQueue, MaxUnackedMessages, VirtualHost, ManagementApiTimeout
+            Hostname, Username, Password, ExchangeName, QueueDurable, MessagePersistent, LazyQueue, MaxUnackedMessages, VirtualHost, ManagementApiTimeout, ManagementUri
         };
 
         /// <summary>
@@ -91,12 +92,12 @@ namespace SanteDB.Queue.RabbitMq.Docker
 
             if (!settings.TryGetValue(Username, out string username))
             {
-                username = "admin";
+                username = "guest";
             }
 
             if (!settings.TryGetValue(Password, out string password))
             {
-                password = "admin";
+                password = "guest";
             }
 
             if (!settings.TryGetValue(QueueDurable, out string durable))
@@ -116,7 +117,7 @@ namespace SanteDB.Queue.RabbitMq.Docker
 
             if (!settings.TryGetValue(LazyQueue, out string lazy))
             {
-                lazy = "false";
+                lazy = "true";
             }
 
             if (!settings.TryGetValue(MaxUnackedMessages, out string maxUnackedMessageLimit))
@@ -129,9 +130,14 @@ namespace SanteDB.Queue.RabbitMq.Docker
                 virtualHost = "/";
             }
 
-            if (!settings.TryGetValue(ManagementApiTimeout, out string mgmtApiTimeout))
+            if (!settings.TryGetValue(ManagementApiTimeout, out string managementApiTimeout))
             {
-                mgmtApiTimeout = "500";
+                managementApiTimeout = "500";
+            }
+            
+            if (!settings.TryGetValue(ManagementUri, out string managementUri))
+            {
+                managementUri = "http://localhost:15672/";
             }
 
             // Parse to make sure appropriate values were provided
@@ -151,9 +157,13 @@ namespace SanteDB.Queue.RabbitMq.Docker
             {
                 throw new ConfigurationException($"maxUnackedMessageLimit = {maxUnackedMessageLimit} is not understood as a unsigned short value", configuration);
             }
-            if(!int.TryParse(mgmtApiTimeout, out int validatedMgmtApiTimeout))
+            if(!int.TryParse(managementApiTimeout, out int validatedManagementApiTimeout))
             {
-                throw new ConfigurationException($"mgmtApiTimeout = {validatedMgmtApiTimeout} is not understood as a integer value", configuration);
+                throw new ConfigurationException($"managementApiTimeout = {validatedManagementApiTimeout} is not understood as a integer value", configuration);
+            }
+            if(!Uri.IsWellFormedUriString(managementUri, UriKind.Absolute))
+            {
+                throw new ConfigurationException($"managementUri = {managementUri} is not understood as a well formed Uri value", configuration);
             }
 
             // Rabbitmq Config
@@ -176,7 +186,8 @@ namespace SanteDB.Queue.RabbitMq.Docker
             rabbitMqSetting.MaxUnackedMessages = validatedMaxUnackedMessageLimit;
             rabbitMqSetting.MessagePersistent = validatedMessagePersistence;
             rabbitMqSetting.LazyQueue = validatedLazySetting;
-            rabbitMqSetting.ManagementApiTimeout = validatedMgmtApiTimeout;
+            rabbitMqSetting.ManagementApiTimeout = validatedManagementApiTimeout;
+            rabbitMqSetting.ManagementUri = managementUri;
             
             // Add services
             var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
