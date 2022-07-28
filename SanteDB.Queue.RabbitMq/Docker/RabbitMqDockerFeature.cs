@@ -31,16 +31,59 @@ namespace SanteDB.Queue.RabbitMq.Docker
 {
     public class RabbitMqDockerFeature : IDockerFeature
     {
+        /// <summary>
+        ///  Name of the device hosting RabbitMQ
+        /// </summary>
         public const string Hostname = "hostname";
+
+        /// <summary>
+        /// Username for  authenticating to the RabbitMQ server
+        /// </summary>
         public const string Username = "username";
+
+        /// <summary>
+        /// Password for  authenticating to the RabbitMQ server
+        /// </summary>
         public const string Password = "password";
+
+        /// <summary>
+        /// Name of RabbitMQ exchange
+        /// </summary>
         public const string ExchangeName = "exchangeName";
+
+        /// <summary>
+        /// The queue durability setting
+        /// </summary>
         public const string QueueDurable = "durable";
+
+        /// <summary>
+        /// The message persistence setting
+        /// </summary>
         public const string MessagePersistent = "messagePersistence";
+
+        /// <summary>
+        /// The lazy queue setting
+        /// </summary>
         public const string LazyQueue = "lazy";
+
+        /// <summary>
+        /// The setting for limiting number of unacknowledged message
+        /// </summary>
         public const string MaxUnackedMessages = "maxUnackedMessageLimit";
+
+        /// <summary>
+        /// The virtual host
+        /// </summary>
         public const string VirtualHost = "virtualHost";
+
+        /// <summary>
+        /// The timeout setting for request to management API
+        /// </summary>
         public const string ManagementApiTimeout = "managementApiTimeout";
+
+        /// <summary>
+        /// The URI to management API
+        /// </summary>
         public const string ManagementUri = "managementUri";
 
         /// <summary>
@@ -56,7 +99,7 @@ namespace SanteDB.Queue.RabbitMq.Docker
         /// <list type="table">
         ///     <item><term>Hostname</term><description>Name of host where RabbitMQ resides</description></item>
         ///     <item><term>Username</term><description>Username</description></item>
-        ///     <item><term>Password</term><description>Passwprd</description></item>
+        ///     <item><term>Password</term><description>Password</description></item>
         ///     <item><term>ExchangeName</term><description>Name of RabbitMq Exchange</description></item>
         ///     <item><term>QueueDurable</term><description>Defines whether queue should be durable</description></item>
         ///     <item><term>MessagePersistent</term><description>Defines whether messages should be marked as persistent</description></item>
@@ -79,116 +122,123 @@ namespace SanteDB.Queue.RabbitMq.Docker
         /// <param name="settings">Settings which were parsed from the environment in SDB_{this.Id}_{Key}={Value}</param>
         public void Configure(SanteDBConfiguration configuration, IDictionary<string, string> settings)
         {
+            var hostname = "localhost";
+            var username = "guest";
+            var password = "guest";
+            var durable = "true";
+            var exchangeName = "SanteExc01";
+            var messagePersistence = "true";
+            var lazy = "true";
+            var maxUnackedMessageLimit = "1";
+            var virtualHost = "/";
+            var managementApiTimeout = "500";
+            var managementUri = "http://localhost:15672/";
+
             // The type of service to add
-            Type[] serviceTypes = new Type[] {
-                typeof(RabbitMqService),
-            };
+            Type[] serviceTypes = new Type[] { typeof(RabbitMqService) };
 
             // Try to get value of settings
-            if (!settings.TryGetValue(Hostname, out string hostname))
+            if (settings.TryGetValue(Hostname, out var foundHostname))
             {
-                hostname = "localhost";
+                hostname = foundHostname;
             }
 
-            if (!settings.TryGetValue(Username, out string username))
+            if (settings.TryGetValue(Username, out var foundUsername))
             {
-                username = "guest";
+                username = foundUsername;
             }
 
-            if (!settings.TryGetValue(Password, out string password))
+            if (settings.TryGetValue(Username, out var foundPassword))
             {
-                password = "guest";
+                password = foundPassword;
             }
 
-            if (!settings.TryGetValue(QueueDurable, out string durable))
+            if (settings.TryGetValue(QueueDurable, out var foundDurable))
             {
-                durable = "true";
+                durable = foundDurable;
             }
 
-            if (!settings.TryGetValue(ExchangeName, out string exchangeName))
+            if (settings.TryGetValue(ExchangeName, out var foundExchangeName))
             {
-                exchangeName = "SanteExc01";
+                exchangeName = foundExchangeName;
             }
 
-            if (!settings.TryGetValue(MessagePersistent, out string messagePersistence))
+            if (settings.TryGetValue(MessagePersistent, out var foundMessagePersistence))
             {
-                messagePersistence = "true";
+                messagePersistence = foundMessagePersistence;
             }
 
-            if (!settings.TryGetValue(LazyQueue, out string lazy))
+            if (settings.TryGetValue(LazyQueue, out var foundLazy))
             {
-                lazy = "true";
+                lazy = foundLazy;
             }
 
-            if (!settings.TryGetValue(MaxUnackedMessages, out string maxUnackedMessageLimit))
+            if (settings.TryGetValue(MaxUnackedMessages, out var foundMaxUnackedMessages))
             {
-                maxUnackedMessageLimit = "1";
+                maxUnackedMessageLimit = foundMaxUnackedMessages;
             }
 
-            if (!settings.TryGetValue(VirtualHost, out string virtualHost))
+            if (settings.TryGetValue(VirtualHost, out var foundVirtualHost))
             {
-                virtualHost = "/";
+                virtualHost = foundVirtualHost;
             }
 
-            if (!settings.TryGetValue(ManagementApiTimeout, out string managementApiTimeout))
+            if (settings.TryGetValue(ManagementApiTimeout, out var foundManagementApiTimeout))
             {
-                managementApiTimeout = "500";
+                managementApiTimeout = foundManagementApiTimeout;
             }
-            
-            if (!settings.TryGetValue(ManagementUri, out string managementUri))
+
+            if (settings.TryGetValue(ManagementUri, out var foundManagementURI))
             {
-                managementUri = "http://localhost:15672/";
+                managementUri = foundManagementURI;
             }
 
             // Parse to make sure appropriate values were provided
-            if(!Boolean.TryParse(durable, out bool validatedDurableSetting))
+            if (!bool.TryParse(durable, out var validatedDurableSetting))
             {
-                throw new ConfigurationException($"durable = {durable} is not understood as a boolean value", configuration);
-            }
-            if(!Boolean.TryParse(messagePersistence, out bool validatedMessagePersistence))
-            {
-                throw new ConfigurationException($"messagePersistence = {messagePersistence} is not understood as a boolean value", configuration);
-            }
-            if(!Boolean.TryParse(lazy, out bool validatedLazySetting))
-            {
-                throw new ConfigurationException($"lazy = {lazy} is not understood as a boolean value", configuration);
-            }
-            if(!ushort.TryParse(maxUnackedMessageLimit, out ushort validatedMaxUnackedMessageLimit))
-            {
-                throw new ConfigurationException($"maxUnackedMessageLimit = {maxUnackedMessageLimit} is not understood as a unsigned short value", configuration);
-            }
-            if(!int.TryParse(managementApiTimeout, out int validatedManagementApiTimeout))
-            {
-                throw new ConfigurationException($"managementApiTimeout = {validatedManagementApiTimeout} is not understood as a integer value", configuration);
-            }
-            if(!Uri.IsWellFormedUriString(managementUri, UriKind.Absolute))
-            {
-                throw new ConfigurationException($"managementUri = {managementUri} is not understood as a well formed Uri value", configuration);
+                throw new ConfigurationException($"{QueueDurable} = {durable} is not understood as a boolean value", configuration);
             }
 
-            // Rabbitmq Config
-            var rabbitMqSetting = configuration.GetSection<RabbitMqConfigurationSection>();
-
-            if (rabbitMqSetting == null)
+            if (!bool.TryParse(messagePersistence, out var validatedMessagePersistence))
             {
-                rabbitMqSetting = new RabbitMqConfigurationSection()
-                {
-                };
-                configuration.AddSection(rabbitMqSetting);
+                throw new ConfigurationException($"{MessagePersistent} = {messagePersistence} is not understood as a boolean value", configuration);
             }
 
-            rabbitMqSetting.Hostname = hostname;
-            rabbitMqSetting.VirtualHost = virtualHost;
-            rabbitMqSetting.Username = username;
-            rabbitMqSetting.Password = password;
-            rabbitMqSetting.ExchangeName = exchangeName;
-            rabbitMqSetting.QueueDurable = validatedDurableSetting;
-            rabbitMqSetting.MaxUnackedMessages = validatedMaxUnackedMessageLimit;
-            rabbitMqSetting.MessagePersistent = validatedMessagePersistence;
-            rabbitMqSetting.LazyQueue = validatedLazySetting;
-            rabbitMqSetting.ManagementApiTimeout = validatedManagementApiTimeout;
-            rabbitMqSetting.ManagementUri = managementUri;
-            
+            if (!bool.TryParse(lazy, out var validatedLazySetting))
+            {
+                throw new ConfigurationException($"{LazyQueue} = {lazy} is not understood as a boolean value", configuration);
+            }
+
+            if (!ushort.TryParse(maxUnackedMessageLimit, out var validatedMaxUnackedMessageLimit))
+            {
+                throw new ConfigurationException($"{MaxUnackedMessages} = {maxUnackedMessageLimit} is not understood as a unsigned short value", configuration);
+            }
+
+            if (!int.TryParse(managementApiTimeout, out var validatedManagementApiTimeout))
+            {
+                throw new ConfigurationException($"{ManagementApiTimeout} = {validatedManagementApiTimeout} is not understood as a integer value", configuration);
+            }
+
+            if (!Uri.IsWellFormedUriString(managementUri, UriKind.Absolute))
+            {
+                throw new ConfigurationException($"{ManagementUri} = {managementUri} is not understood as a well formed Uri value", configuration);
+            }
+
+            // RabbitMQ Config
+            var rabbitMqConfigurationSection = configuration.GetSection<RabbitMqConfigurationSection>() ?? new RabbitMqConfigurationSection();
+
+            rabbitMqConfigurationSection.Hostname = hostname;
+            rabbitMqConfigurationSection.VirtualHost = virtualHost;
+            rabbitMqConfigurationSection.Username = username;
+            rabbitMqConfigurationSection.Password = password;
+            rabbitMqConfigurationSection.ExchangeName = exchangeName;
+            rabbitMqConfigurationSection.QueueDurable = validatedDurableSetting;
+            rabbitMqConfigurationSection.MaxUnackedMessages = validatedMaxUnackedMessageLimit;
+            rabbitMqConfigurationSection.MessagePersistent = validatedMessagePersistence;
+            rabbitMqConfigurationSection.LazyQueue = validatedLazySetting;
+            rabbitMqConfigurationSection.ManagementApiTimeout = validatedManagementApiTimeout;
+            rabbitMqConfigurationSection.ManagementUri = managementUri;
+
             // Add services
             var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
             serviceConfiguration.AddRange(serviceTypes.Where(t => !serviceConfiguration.Any(c => c.Type == t)).Select(t => new TypeReferenceConfiguration(t)));
