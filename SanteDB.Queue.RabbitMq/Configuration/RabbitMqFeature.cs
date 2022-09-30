@@ -18,11 +18,10 @@
  * User: fyfej
  * Date: 2022-5-30
  */
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
 using SanteDB.Core.Configuration;
 using SanteDB.Core.Configuration.Features;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SanteDB.Queue.RabbitMq.Configuration
 {
@@ -33,7 +32,7 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         /// Gets the name of the queue
         /// </summary>
         public override string Name => "RabbitMQ";
-        
+
         /// <summary>
         /// Gets the group 
         /// </summary>

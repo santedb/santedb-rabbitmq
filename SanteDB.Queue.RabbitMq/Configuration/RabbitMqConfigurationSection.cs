@@ -18,12 +18,10 @@
  * User: fyfej
  * Date: 2022-5-30
  */
-using System;
+using SanteDB.Core.Configuration;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
 using System.Xml.Serialization;
-using SanteDB.Core.Configuration;
 
 namespace SanteDB.Queue.RabbitMq.Configuration
 {
@@ -117,6 +115,6 @@ namespace SanteDB.Queue.RabbitMq.Configuration
         [XmlAttribute("managementApiTimeout")]
         [DisplayName("Management Api Timeout")]
         [Description("Timeout value in milliseconds for when requesting response from management api")]
-        public int ManagementApiTimeout { get; set; }  = 500;
+        public int ManagementApiTimeout { get; set; } = 500;
     }
 }

@@ -18,13 +18,13 @@
  * User: fyfej
  * Date: 2022-5-30
  */
+using SanteDB.Core.Configuration;
+using SanteDB.Core.Exceptions;
 using SanteDB.Docker.Core;
+using SanteDB.Queue.RabbitMq.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SanteDB.Core.Configuration;
-using SanteDB.Core.Exceptions;
-using SanteDB.Queue.RabbitMq.Configuration;
 
 namespace SanteDB.Queue.RabbitMq.Docker
 {

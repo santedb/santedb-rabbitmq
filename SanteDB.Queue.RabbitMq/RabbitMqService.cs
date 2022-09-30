@@ -18,12 +18,16 @@
  * User: fyfej
  * Date: 2022-5-30
  */
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
+using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Queue;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
+using SanteDB.Core.Services;
 using SanteDB.Queue.RabbitMq.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -35,10 +39,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Model.Serialization;
-using SanteDB.Core.Services;
 
 namespace SanteDB.Queue.RabbitMq
 {
@@ -116,7 +116,7 @@ namespace SanteDB.Queue.RabbitMq
             //set up connection, exchange and channel
             this.m_connectionFactory = new ConnectionFactory()
             {
-                HostName = this.m_configuration.Hostname, 
+                HostName = this.m_configuration.Hostname,
                 VirtualHost = this.m_configuration.VirtualHost,
                 UserName = this.m_configuration.Username,
                 Password = this.m_configuration.Password
@@ -134,7 +134,7 @@ namespace SanteDB.Queue.RabbitMq
         /// <param name="queueName"></param>
         private void OpenQueue(string queueName)
         {
-            Dictionary<string, object> args = this.m_configuration.LazyQueue ? new Dictionary<string, object>(){{"x-queue-mode", "lazy"}} : null;
+            Dictionary<string, object> args = this.m_configuration.LazyQueue ? new Dictionary<string, object>() { { "x-queue-mode", "lazy" } } : null;
             //creates queue if it doesn't exist
             try
             {
@@ -197,7 +197,7 @@ namespace SanteDB.Queue.RabbitMq
             catch (Exception e)
             {
                 this.m_tracer.TraceError($"Error unsubscribing from {queueName}", e);
-            }        
+            }
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace SanteDB.Queue.RabbitMq
             catch (Exception e)
             {
                 this.m_tracer.TraceError($"Error purging queue {queueName}", e);
-            }            
+            }
         }
 
         /// <summary>
@@ -296,11 +296,11 @@ namespace SanteDB.Queue.RabbitMq
         public IEnumerable<DispatcherQueueInfo> GetQueues()
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{this.m_configuration.Username}:{this.m_configuration.Password}")));
-            
+
             //request all queues from management api
             var response = new HttpResponseMessage();
             var cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(this.m_configuration.ManagementApiTimeout); 
+            cancellationTokenSource.CancelAfter(this.m_configuration.ManagementApiTimeout);
             using (var requestTask = Task.Run(async () => await client.GetAsync($"{this.m_configuration.ManagementUri}api/queues"), cancellationTokenSource.Token))
             {
                 try
@@ -331,7 +331,7 @@ namespace SanteDB.Queue.RabbitMq
                 }
                 catch (AggregateException e)
                 {
-                   this.m_tracer.TraceError($"Error reading json content {json}", e);
+                    this.m_tracer.TraceError($"Error reading json content {json}", e);
                 }
             }
 
