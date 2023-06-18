@@ -11,7 +11,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 	</ItemGroup>
 
@@ -19,7 +19,31 @@
 	  <ProjectReference Include="..\..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
 	</ItemGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+
+  <PropertyGroup>
+    <PackageId>SanteDB.Queue.RabbitMq</PackageId>
+    <Title>SanteDB.Queue.RabbitMq</Title>
+    <Version>$(VersionNumber)</Version>
+    <Description>SanteDB RabbitMQ Plugin</Description>
+    <Authors>SanteSuite Contributors</Authors>
+    <PackageTags>SanteDB</PackageTags>
+    <RepositoryUrl>https://github.com/santedb/santedb-rabbitmq</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Product>SanteDB</Product>
+    <Copyright>Copyright (C) 2015-2023 SanteSuite Contributors (See: NOTICES)</Copyright>
+    <Company>SanteSuite Contributors</Company>
+    <PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
+    <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
+    <RootNamespace>SanteDB.Queue.RabbitMq</RootNamespace>
+    <AssemblyName>SanteDB.Queue.RabbitMq</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>full</DebugType>
 		<Optimize>false</Optimize>
