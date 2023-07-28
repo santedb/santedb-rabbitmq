@@ -28,6 +28,9 @@ using System.Linq;
 
 namespace SanteDB.Queue.RabbitMq.Docker
 {
+    /// <summary>
+    /// Feature configuration provider for <see cref="RabbitMqService"/>.
+    /// </summary>
     public class RabbitMqDockerFeature : IDockerFeature
     {
         /// <summary>

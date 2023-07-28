@@ -25,6 +25,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SanteDB.Queue.RabbitMq.Configuration
 {
+    /// <summary>
+    /// Configuration for using the <see cref="RabbitMqService"/>.
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public class RabbitMqFeature : GenericServiceFeature<RabbitMqService>
     {
