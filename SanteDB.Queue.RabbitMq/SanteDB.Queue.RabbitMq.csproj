@@ -1,25 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-	</PropertyGroup>
 	<PropertyGroup Condition="'$(VersionNumber)' == ''">
 		<VersionNumber>3.0-debug</VersionNumber>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Include="..\..\SanteDB.licenseheader" Link="SanteDB.licenseheader" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
-	</ItemGroup>
-
-
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net48;netstandard2.0</TargetFrameworks>
+	</PropertyGroup>
+	
   <PropertyGroup>
     <PackageId>SanteDB.Queue.RabbitMq</PackageId>
     <Title>SanteDB.Queue.RabbitMq</Title>
@@ -33,7 +19,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Product>SanteDB</Product>
     <Copyright>Copyright (C) 2015-2026 SanteSuite Contributors (See: NOTICES)</Copyright>
     <Company>SanteSuite Contributors</Company>
@@ -43,43 +28,30 @@
     <AssemblyName>SanteDB.Queue.RabbitMq</AssemblyName>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<DebugSymbols>true</DebugSymbols>
-		<DebugType>full</DebugType>
-		<Optimize>false</Optimize>
-		<OutputPath>bin\Debug\</OutputPath>
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>portable</DebugType>
-		<Optimize>true</Optimize>
-		<OutputPath>bin\Release\</OutputPath>
-		<DefineConstants>TRACE</DefineConstants>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\..\SanteDB.licenseheader" Link="SanteDB.licenseheader" />
+	</ItemGroup>
 
 	<Choose>
 		<When Condition="$(SolutionName.Contains('-ext'))">
 			<ItemGroup>
-				<ProjectReference Include="..\..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj">
-					<Project>{F1A82A4F-4A57-47D7-AE76-444C8A4FF54A}</Project>
-					<Name>SanteDB.Core.Model</Name>
-				</ProjectReference>
-				<ProjectReference Include="..\..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj">
-					<Project>{3A45F695-47A2-464C-ACE6-BDABBFA39FBC}</Project>
-					<Name>SanteDB.Core.Api</Name>
-				</ProjectReference>
-
+				<ProjectReference Include="..\..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj" />
+				<ProjectReference Include="..\..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj" />
+				<ProjectReference Include="..\..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
 			</ItemGroup>
 		</When>
 		<Otherwise>
 			<ItemGroup>
 				<PackageReference Include="SanteDB.Core.Api" Version="$(VersionNumber)" />
 				<PackageReference Include="SanteDB.Core.Model" Version="$(VersionNumber)" />
+				<PackageReference Include="SanteDB.Docker.Core" Version="$(VersionNumber)" />
 			</ItemGroup>
 		</Otherwise>
 	</Choose>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="System.Net.Http" Version="[4.3.4,4.4)" />
+		<PackageReference Include="RabbitMQ.Client" Version="[6.8.1,7)" />
+	</ItemGroup>
 </Project>

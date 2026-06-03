@@ -60,6 +60,8 @@ namespace SanteDB.Queue.RabbitMq
         //connection
         private IConnection m_connection;
 
+        
+
         //channel
         private IModel m_channel;
 
@@ -119,6 +121,7 @@ namespace SanteDB.Queue.RabbitMq
                 UserName = this.m_configuration.Username,
                 Password = this.m_configuration.Password
             };
+
             this.m_connection = this.m_connectionFactory.CreateConnection();
             this.m_channel = this.m_connection.CreateModel();
             this.m_channel.ExchangeDeclare(this.m_configuration.ExchangeName, "direct");
